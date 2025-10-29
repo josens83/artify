@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artify - Editor</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Roboto:wght@400;500;700;900&family=Montserrat:wght@400;500;700;900&family=Playfair+Display:wght@400;700;900&family=Pacifico&family=Lobster&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .element {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+        }
+
+        .element.selected {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .element img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .resize-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+
+        .rotate-handle {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 10;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
+
+        .properties-panel {
+            width: 320px;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
+
+        .toolbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            overflow: auto;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .tab-button {
+            padding: 12px 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 13px;
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+            min-width: 75px;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-button:hover {
+            background: #f3f4f6;
+        }
+
+        .shape-button {
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .shape-button:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .upload-button {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .upload-button:hover {
+            background: #2563eb;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            padding: 10px 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .history-button {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+        }
+
+        .history-button:hover:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #3b82f6;
+        }
+
+        .history-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-result-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ai-result-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .hashtag {
+            display: inline-block;
+            background: #eff6ff;
+            color: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .trend-card {
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .trend-growth {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .upload-zone {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .upload-zone.dragging {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .keyboard-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-left: 4px;
+        }
+
+        .prompt-example {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+        }
+
+        .prompt-example:hover {
+            background: #e5e7eb;
+            border-color: #3b82f6;
+        }
+
+        .cost-badge {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            color: #991b1b;
+            margin-top: 12px;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 12px;
+            color: #065f46;
+            margin-top: 12px;
+        }
+
+        .image-preview {
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+        }
+
+        .meta-info {
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .meta-info p {
+            margin-bottom: 8px;
+        }
+
+        .meta-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .template-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        const API_URL = 'http://localhost:3001/api';
+        const PYTHON_API_URL = 'http://localhost:8000/api';
+
+        const TEMPLATES = [
+            {
+                id: 'instagram-post',
+                name: 'Instagram Post',
+                icon: '📱',
+                width: 1080,
+                height: 1080,
+                elements: [
+                    {
+                        id: 1,
+                        type: 'rectangle',
+                        x: 0,
+                        y: 0,
+                        width: 1080,
+                        height: 1080,
+                        rotation: 0,
+                        fill: '#FF6B6B',
+                        opacity: 1
+                    },
+                    {
+                        id: 2,
+                        type: 'text',
+                        x: 90,
+                        y: 400,
+                        width: 900,
+                        height: 280,
+                        rotation: 0,
+                        fill: '#FFFFFF',
+                        text: '여기에 텍스트를\n입력하세요',
+                        fontSize: 96,
+                        fontWeight: 'bold',
+                        fontFamily: 'Montserrat',
+                        opacity: 1
+                    }
+                ]
+            },
+            {
+                id: 'instagram-story',
+                name: 'Instagram Story',
+                icon: '📱',
+                width: 1080,
+                height: 1920,
+                elements: [
+                    {
+                        id: 1,
+                        type: 'rectangle',
+                        x: 0,
+                        y: 0,
+                        width: 1080,
+                        height: 1920,
+                        rotation: 0,
+                        fill: '#4ECDC4',
+                        opacity: 1
+                    },
+                    {
+                        id: 2,
+                        type: 'text',
+                        x: 100,
+                        y: 800,
+                        width: 880,
+                        height: 320,
+                        rotation: 0,
+                        fill: '#FFFFFF',
+                        text: 'Instagram\nStory',
+                        fontSize: 120,
+                        fontWeight: 'bold',
+                        fontFamily: 'Montserrat',
+                        opacity: 1
+                    }
+                ]
+            },
+            {
+                id: 'facebook-post',
+                name: 'Facebook Post',
+                icon: '👍',
+                width: 1200,
+                height: 630,
+                elements: [
+                    {
+                        id: 1,
+                        type: 'rectangle',
+                        x: 0,
+                        y: 0,
+                        width: 1200,
+                        height: 630,
+                        rotation: 0,
+                        fill: '#FFE66D',
+                        opacity: 1
+                    },
+                    {
+                        id: 2,
+                        type: 'text',
+                        x: 100,
+                        y: 220,
+                        width: 1000,
+                        height: 190,
+                        rotation: 0,
+                        fill: '#2D3436',
+                        text: 'Facebook Post',
+                        fontSize: 96,
+                        fontWeight: 'bold',
+                        fontFamily: 'Roboto',
+                        opacity: 1
+                    }
+                ]
+            },
+            {
+                id: 'twitter-post',
+                name: 'Twitter Post',
+                icon: '🐦',
+                width: 1200,
+                height: 675,
+                elements: [
+                    {
+                        id: 1,
+                        type: 'rectangle',
+                        x: 0,
+                        y: 0,
+                        width: 1200,
+                        height: 675,
+                        rotation: 0,
+                        fill: '#A8E6CF',
+                        opacity: 1
+                    },
+                    {
+                        id: 2,
+                        type: 'text',
+                        x: 100,
+                        y: 240,
+                        width: 1000,
+                        height: 195,
+                        rotation: 0,
+                        fill: '#2D3436',
+                        text: 'Twitter Post',
+                        fontSize: 96,
+                        fontWeight: 'bold',
+                        fontFamily: 'Roboto',
+                        opacity: 1
+                    }
+                ]
+            },
+            {
+                id: 'blank',
+                name: '빈 캔버스',
+                icon: '⬜',
+                width: 800,
+                height: 1000,
+                elements: []
+            }
+        ];
+
+        const FONTS = [
+            { name: 'Noto Sans KR', value: 'Noto Sans KR' },
+            { name: 'Roboto', value: 'Roboto' },
+            { name: 'Montserrat', value: 'Montserrat' },
+            { name: 'Playfair Display', value: 'Playfair Display' },
+            { name: 'Pacifico', value: 'Pacifico' },
+            { name: 'Lobster', value: 'Lobster' }
+        ];
+
+        const auth = {
+            getToken: () => localStorage.getItem('token'),
+            getUser: () => {
+                const user = localStorage.getItem('user');
+                return user ? JSON.parse(user) : null;
+            },
+            logout: () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+        };
+
+        function CanvasEditor() {
+            const [elements, setElements] = useState([]);
+            const [selectedId, setSelectedId] = useState(null);
+            const [isDragging, setIsDragging] = useState(false);
+            const [isResizing, setIsResizing] = useState(false);
+            const [isRotating, setIsRotating] = useState(false);
+            const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+            const [canvasSize, setCanvasSize] = useState({ width: 800, height: 1000 });
+            const [zoom, setZoom] = useState(75);
+            const [activeTab, setActiveTab] = useState('elements');
+            const [projectId, setProjectId] = useState(null);
+            const [projectTitle, setProjectTitle] = useState('Untitled Project');
+            
+            const [showTemplateModal, setShowTemplateModal] = useState(false);
+            const [exporting, setExporting] = useState(false);
+            
+            const [aiTextForm, setAiTextForm] = useState({
+                brand_name: '',
+                product: '',
+                purpose: 'promotion',
+                tone: 'friendly',
+                platform: 'instagram'
+            });
+            const [aiTextResults, setAiTextResults] = useState([]);
+            const [aiTextLoading, setAiTextLoading] = useState(false);
+            
+            const [aiImageForm, setAiImageForm] = useState({
+                prompt: '',
+                style: 'vivid',
+                size: '1024x1024',
+                quality: 'standard'
+            });
+            const [aiImageLoading, setAiImageLoading] = useState(false);
+            const [generatedImage, setGeneratedImage] = useState(null);
+            const [imageError, setImageError] = useState(null);
+            
+            const [trendingData, setTrendingData] = useState(null);
+            const [predictionData, setPredictionData] = useState(null);
+
+            const [uploading, setUploading] = useState(false);
+            const [dragOver, setDragOver] = useState(false);
+
+            const [history, setHistory] = useState({
+                past: [],
+                present: [],
+                future: []
+            });
+
+            const canvasRef = useRef(null);
+            const resizeDirection = useRef(null);
+            const fileInputRef = useRef(null);
+
+            const updateHistory = useCallback((newElements) => {
+                setHistory(prev => ({
+                    past: [...prev.past, prev.present].slice(-20),
+                    present: newElements,
+                    future: []
+                }));
+            }, []);
+
+            const setElementsWithHistory = useCallback((newElements) => {
+                if (typeof newElements === 'function') {
+                    setElements(prevElements => {
+                        const updatedElements = newElements(prevElements);
+                        updateHistory(updatedElements);
+                        return updatedElements;
+                    });
+                } else {
+                    updateHistory(newElements);
+                    setElements(newElements);
+                }
+            }, [updateHistory]);
+
+            const applyTemplate = (template) => {
+                setCanvasSize({ width: template.width, height: template.height });
+                setElementsWithHistory(template.elements.map(el => ({
+                    ...el,
+                    id: Date.now() + Math.random()
+                })));
+                setShowTemplateModal(false);
+                setProjectTitle(template.name + ' - ' + new Date().toLocaleDateString('ko-KR'));
+            };
+
+            const exportCanvas = async (format = 'png') => {
+                if (!canvasRef.current) {
+                    alert('캔버스를 찾을 수 없습니다.');
+                    return;
+                }
+
+                setExporting(true);
+
+                try {
+                    const tempSelectedId = selectedId;
+                    setSelectedId(null);
+
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    const canvas = await html2canvas(canvasRef.current, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false
+                    });
+
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        const date = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
+                        link.download = `${projectTitle} - ${date}.${format}`;
+                        link.href = url;
+                        link.click();
+                        URL.revokeObjectURL(url);
+
+                        setSelectedId(tempSelectedId);
+                        setExporting(false);
+                        alert(`✅ ${format.toUpperCase()} 다운로드 완료!`);
+                    }, `image/${format}`, format === 'jpeg' ? 0.95 : 1.0);
+
+                } catch (error) {
+                    console.error('Export error:', error);
+                    alert('내보내기에 실패했습니다.');
+                    setExporting(false);
+                    setSelectedId(selectedId);
+                }
+            };
+
+            const undo = useCallback(() => {
+                if (history.past.length === 0) return;
+
+                const previous = history.past[history.past.length - 1];
+                const newPast = history.past.slice(0, history.past.length - 1);
+
+                setHistory({
+                    past: newPast,
+                    present: previous,
+                    future: [history.present, ...history.future]
+                });
+                setElements(previous);
+            }, [history]);
+
+            const redo = useCallback(() => {
+                if (history.future.length === 0) return;
+
+                const next = history.future[0];
+                const newFuture = history.future.slice(1);
+
+                setHistory({
+                    past: [...history.past, history.present],
+                    present: next,
+                    future: newFuture
+                });
+                setElements(next);
+            }, [history]);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                        e.preventDefault();
+                        undo();
+                    }
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                        e.preventDefault();
+                        redo();
+                    }
+                    if (e.key === 'Delete' && selectedId) {
+                        deleteElement();
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [undo, redo, selectedId]);
+
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+                if (id) {
+                    setProjectId(id);
+                    loadProject(id);
+                } else {
+                    createNewProject();
+                }
+                loadTrendingData();
+            }, []);
+
+            useEffect(() => {
+                if (elements.length > 0 && history.present.length === 0) {
+                    setHistory({
+                        past: [],
+                        present: elements,
+                        future: []
+                    });
+                }
+            }, [elements]);
+
+            const createNewProject = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/projects`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.getToken()}`
+                        },
+                        body: JSON.stringify({
+                            title: 'Untitled Project',
+                            canvas_width: 800,
+                            canvas_height: 1000
+                        })
+                    });
+
+                    if (response.ok) {
+                        const project = await response.json();
+                        setProjectId(project.id);
+                        setProjectTitle(project.title);
+                        window.history.replaceState({}, '', `?id=${project.id}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to create project:', error);
+                }
+            };
+
+            const loadProject = async (id) => {
+                try {
+                    const response = await fetch(`${API_URL}/projects/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${auth.getToken()}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const project = await response.json();
+                        setProjectTitle(project.title);
+                        setCanvasSize({
+                            width: project.canvas_width,
+                            height: project.canvas_height
+                        });
+                        const loadedElements = project.canvas_data || [];
+                        setElements(loadedElements);
+                        setHistory({
+                            past: [],
+                            present: loadedElements,
+                            future: []
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to load project:', error);
+                }
+            };
+
+            const saveProject = async () => {
+                if (!projectId) return;
+
+                try {
+                    const response = await fetch(`${API_URL}/projects/${projectId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.getToken()}`
+                        },
+                        body: JSON.stringify({
+                            title: projectTitle,
+                            canvas_data: elements,
+                            canvas_width: canvasSize.width,
+                            canvas_height: canvasSize.height
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('저장되었습니다!');
+                    }
+                } catch (error) {
+                    console.error('Failed to save project:', error);
+                    alert('저장에 실패했습니다.');
+                }
+            };
+
+            const addElement = (type) => {
+                const newElement = {
+                    id: Date.now(),
+                    type,
+                    x: 100,
+                    y: 100,
+                    width: type === 'text' ? 200 : type === 'image' ? 300 : 150,
+                    height: type === 'text' ? 50 : type === 'image' ? 200 : 150,
+                    rotation: 0,
+                    fill: type === 'rectangle' ? '#ff6b6b' : 
+                          type === 'circle' ? '#4ecdc4' : 
+                          type === 'triangle' ? '#ffe66d' : '#000000',
+                    text: type === 'text' ? '텍스트를 입력하세요' : '',
+                    imageUrl: type === 'image' ? '' : null,
+                    fontSize: 24,
+                    fontWeight: 'normal',
+                    fontFamily: 'Noto Sans KR',
+                    opacity: 1
+                };
+                setElementsWithHistory([...elements, newElement]);
+                setSelectedId(newElement.id);
+            };
+
+            const uploadImage = async (file) => {
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    alert('이미지 파일만 업로드 가능합니다.');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('파일 크기는 10MB 이하여야 합니다.');
+                    return;
+                }
+
+                setUploading(true);
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch(`${API_URL}/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${auth.getToken()}`
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        addImageToCanvas(`http://localhost:3001${data.url}`);
+                    } else {
+                        alert('업로드에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('이미지 업로드 중 오류가 발생했습니다.');
+                } finally {
+                    setUploading(false);
+                }
+            };
+
+            const addImageToCanvas = (imageUrl) => {
+                const newElement = {
+                    id: Date.now(),
+                    type: 'image',
+                    x: 50,
+                    y: 50,
+                    width: 300,
+                    height: 200,
+                    rotation: 0,
+                    imageUrl: imageUrl,
+                    opacity: 1
+                };
+                setElementsWithHistory([...elements, newElement]);
+                setSelectedId(newElement.id);
+                setActiveTab('elements');
+            };
+
+            const handleFileSelect = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadImage(file);
+                }
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                setDragOver(true);
+            };
+
+            const handleDragLeave = () => {
+                setDragOver(false);
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setDragOver(false);
+                
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    uploadImage(file);
+                }
+            };
+
+            const generateAIText = async () => {
+                setAiTextLoading(true);
+                try {
+                    const response = await fetch(`${PYTHON_API_URL}/ai/generate-text`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(aiTextForm)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setAiTextResults(data.copies);
+                    } else {
+                        alert('AI 텍스트 생성에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('AI text generation error:', error);
+                    alert('AI 텍스트 생성 중 오류가 발생했습니다.');
+                } finally {
+                    setAiTextLoading(false);
+                }
+            };
+
+            const addAITextToCanvas = (aiText) => {
+                const newElement = {
+                    id: Date.now(),
+                    type: 'text',
+                    x: 50,
+                    y: 50,
+                    width: 400,
+                    height: 100,
+                    rotation: 0,
+                    fill: '#000000',
+                    text: aiText.text,
+                    fontSize: 20,
+                    fontWeight: 'normal',
+                    fontFamily: 'Noto Sans KR',
+                    opacity: 1
+                };
+                setElementsWithHistory([...elements, newElement]);
+                setSelectedId(newElement.id);
+                setActiveTab('elements');
+            };
+
+            const generateAIImage = async () => {
+                if (!aiImageForm.prompt.trim()) {
+                    alert('이미지 설명을 입력해주세요.');
+                    return;
+                }
+
+                setAiImageLoading(true);
+                setGeneratedImage(null);
+                setImageError(null);
+
+                try {
+                    const response = await fetch(`${PYTHON_API_URL}/ai/generate-image`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(aiImageForm)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        setGeneratedImage(data);
+                        console.log('✅ 이미지 생성 성공:', data);
+                    } else {
+                        setImageError(data.detail || 'AI 이미지 생성에 실패했습니다.');
+                        alert(data.detail || 'AI 이미지 생성에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('AI image generation error:', error);
+                    setImageError('네트워크 오류가 발생했습니다.');
+                    alert('AI 이미지 생성 중 오류가 발생했습니다.');
+                } finally {
+                    setAiImageLoading(false);
+                }
+            };
+
+            const addAIImageToCanvas = () => {
+                if (!generatedImage) return;
+                
+                addImageToCanvas(generatedImage.image_url);
+                setGeneratedImage(null);
+                setAiImageForm({ ...aiImageForm, prompt: '' });
+            };
+
+            const loadTrendingData = async () => {
+                try {
+                    const response = await fetch(`${PYTHON_API_URL}/data/trending`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setTrendingData(data);
+                    }
+                } catch (error) {
+                    console.error('Failed to load trending data:', error);
+                }
+            };
+
+            const predictPerformance = async () => {
+                const selectedElement = elements.find(el => el.id === selectedId);
+                if (!selectedElement || selectedElement.type !== 'text') {
+                    alert('텍스트 요소를 선택해주세요.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${PYTHON_API_URL}/analytics/predict`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: selectedElement.text,
+                            has_image: elements.some(el => el.type === 'image'),
+                            hashtags: [],
+                            platform: 'instagram'
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setPredictionData(data);
+                    }
+                } catch (error) {
+                    console.error('Prediction error:', error);
+                }
+            };
+
+            const handleMouseDown = (e, elementId) => {
+                if (e.target.classList.contains('resize-handle')) {
+                    setIsResizing(true);
+                    resizeDirection.current = e.target.className.split(' ')[1];
+                } else if (e.target.classList.contains('rotate-handle')) {
+                    setIsRotating(true);
+                } else {
+                    setIsDragging(true);
+                }
+                setSelectedId(elementId);
+                setDragStart({ x: e.clientX, y: e.clientY });
+            };
+
+            const handleMouseMove = (e) => {
+                if (!selectedId) return;
+
+                const dx = e.clientX - dragStart.x;
+                const dy = e.clientY - dragStart.y;
+
+                if (isDragging) {
+                    setElementsWithHistory(elements.map(el => 
+                        el.id === selectedId 
+                            ? { ...el, x: el.x + dx, y: el.y + dy }
+                            : el
+                    ));
+                } else if (isResizing) {
+                    setElementsWithHistory(elements.map(el => {
+                        if (el.id === selectedId) {
+                            const newEl = { ...el };
+                            if (resizeDirection.current.includes('e')) newEl.width += dx;
+                            if (resizeDirection.current.includes('s')) newEl.height += dy;
+                            return newEl;
+                        }
+                        return el;
+                    }));
+                } else if (isRotating) {
+                    const element = elements.find(el => el.id === selectedId);
+                    const centerX = element.x + element.width / 2;
+                    const centerY = element.y + element.height / 2;
+                    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                    setElementsWithHistory(elements.map(el => 
+                        el.id === selectedId ? { ...el, rotation: angle } : el
+                    ));
+                }
+
+                setDragStart({ x: e.clientX, y: e.clientY });
+            };
+
+            const handleMouseUp = () => {
+                setIsDragging(false);
+                setIsResizing(false);
+                setIsRotating(false);
+            };
+
+            useEffect(() => {
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+                return () => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                };
+            }, [isDragging, isResizing, isRotating, selectedId, dragStart, elements]);
+
+            const selectedElement = elements.find(el => el.id === selectedId);
+
+            const updateProperty = (property, value) => {
+                setElementsWithHistory(elements.map(el => 
+                    el.id === selectedId ? { ...el, [property]: value } : el
+                ));
+            };
+
+            const deleteElement = () => {
+                setElementsWithHistory(elements.filter(el => el.id !== selectedId));
+                setSelectedId(null);
+            };
+
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+                    {/* Toolbar */}
+                    <div className="toolbar">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#7c3aed' }}>
+                                Artify
+                            </h1>
+                            
+                            <button 
+                                className="btn-secondary"
+                                onClick={() => setShowTemplateModal(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}
+                            >
+                                📋 템플릿
+                            </button>
+                            
+                            <input 
+                                type="text" 
+                                value={projectTitle}
+                                onChange={(e) => setProjectTitle(e.target.value)}
+                                className="form-input"
+                                style={{ width: '200px' }}
+                            />
+
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button 
+                                    className="history-button"
+                                    onClick={undo}
+                                    disabled={history.past.length === 0}
+                                    title="되돌리기 (Ctrl+Z)"
+                                >
+                                    ↶ <span className="keyboard-hint">Ctrl+Z</span>
+                                </button>
+                                <button 
+                                    className="history-button"
+                                    onClick={redo}
+                                    disabled={history.future.length === 0}
+                                    title="다시하기 (Ctrl+Y)"
+                                >
+                                    ↷ <span className="keyboard-hint">Ctrl+Y</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="btn-primary" onClick={saveProject}>
+                                💾 저장
+                            </button>
+                            <button 
+                                className="btn-primary" 
+                                onClick={() => exportCanvas('png')}
+                                disabled={exporting}
+                            >
+                                {exporting ? '처리 중...' : '⬇️ PNG'}
+                            </button>
+                            <button 
+                                className="btn-secondary" 
+                                onClick={() => exportCanvas('jpeg')}
+                                disabled={exporting}
+                            >
+                                ⬇️ JPG
+                            </button>
+                            <button 
+                                className="btn-secondary" 
+                                onClick={auth.logout}
+                                style={{ marginLeft: '20px' }}
+                            >
+                                👤 {auth.getUser()?.name}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 템플릿 모달 */}
+                    {showTemplateModal && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000
+                        }} onClick={() => setShowTemplateModal(false)}>
+                            <div style={{
+                                background: 'white',
+                                borderRadius: '12px',
+                                padding: '32px',
+                                maxWidth: '900px',
+                                width: '90%',
+                                maxHeight: '80vh',
+                                overflow: 'auto'
+                            }} onClick={(e) => e.stopPropagation()}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                    <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>템플릿 선택</h2>
+                                    <button 
+                                        onClick={() => setShowTemplateModal(false)}
+                                        style={{ fontSize: '24px', cursor: 'pointer', background: 'none', border: 'none' }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
+                                    {TEMPLATES.map(template => (
+                                        <div
+                                            key={template.id}
+                                            onClick={() => applyTemplate(template)}
+                                            className="template-card"
+                                        >
+                                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>
+                                                {template.icon}
+                                            </div>
+                                            <h3 style={{ fontWeight: '600', marginBottom: '8px', fontSize: '16px' }}>
+                                                {template.name}
+                                            </h3>
+                                            <p style={{ fontSize: '13px', color: '#6b7280' }}>
+                                                {template.width} × {template.height}px
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 내보내기 중 오버레이 */}
+                    {exporting && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            flexDirection: 'column',
+                            gap: '20px'
+                        }}>
+                            <div className="loading" style={{ width: '50px', height: '50px', borderWidth: '5px' }}></div>
+                            <p style={{ color: 'white', fontSize: '18px', fontWeight: '500' }}>
+                                이미지 내보내는 중...
+                            </p>
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                        {/* Sidebar */}
+                        <div className="sidebar">
+                            <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+                                <button 
+                                    className={`tab-button ${activeTab === 'elements' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('elements')}
+                                >
+                                    ⭐ 요소
+                                </button>
+                                <button 
+                                    className={`tab-button ${activeTab === 'upload' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('upload')}
+                                >
+                                    📁 업로드
+                                </button>
+                                <button 
+                                    className={`tab-button ${activeTab === 'ai-text' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('ai-text')}
+                                >
+                                    ✍️ AI 텍스트
+                                </button>
+                                <button 
+                                    className={`tab-button ${activeTab === 'ai-image' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('ai-image')}
+                                >
+                                    🎨 AI 이미지
+                                </button>
+                            </div>
+
+                            <div style={{ padding: '20px' }}>
+                                {activeTab === 'elements' && (
+                                    <div>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>도형 추가</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                            <button className="shape-button" onClick={() => addElement('rectangle')}>
+                                                <div style={{ width: '60px', height: '40px', background: '#ff6b6b', margin: '0 auto' }}></div>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>사각형</p>
+                                            </button>
+                                            <button className="shape-button" onClick={() => addElement('circle')}>
+                                                <div style={{ width: '50px', height: '50px', background: '#4ecdc4', borderRadius: '50%', margin: '0 auto' }}></div>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>원</p>
+                                            </button>
+                                            <button className="shape-button" onClick={() => addElement('triangle')}>
+                                                <div style={{ width: 0, height: 0, borderLeft: '30px solid transparent', borderRight: '30px solid transparent', borderBottom: '50px solid #ffe66d', margin: '0 auto' }}></div>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>삼각형</p>
+                                            </button>
+                                            <button className="shape-button" onClick={() => addElement('text')}>
+                                                <div style={{ fontSize: '32px' }}>T</div>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>텍스트</p>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'upload' && (
+                                    <div>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>이미지 업로드</h3>
+                                        
+                                        <input 
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleFileSelect}
+                                            accept="image/*"
+                                            style={{ display: 'none' }}
+                                        />
+
+                                        <button 
+                                            className="upload-button"
+                                            onClick={() => fileInputRef.current.click()}
+                                            disabled={uploading}
+                                        >
+                                            {uploading ? '업로드 중...' : '📁 파일 선택'}
+                                        </button>
+
+                                        <div 
+                                            className={`upload-zone ${dragOver ? 'dragging' : ''}`}
+                                            onDragOver={handleDragOver}
+                                            onDragLeave={handleDragLeave}
+                                            onDrop={handleDrop}
+                                            onClick={() => fileInputRef.current.click()}
+                                        >
+                                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>
+                                                📷
+                                            </div>
+                                            <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                                                이미지를 드래그하거나<br/>클릭하여 업로드
+                                            </p>
+                                            <p style={{ color: '#9ca3af', fontSize: '12px', marginTop: '8px' }}>
+                                                JPG, PNG, GIF, WEBP (최대 10MB)
+                                            </p>
+                                        </div>
+
+                                        {uploading && (
+                                            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                                                <div className="loading"></div>
+                                                <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
+                                                    업로드 중...
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'ai-text' && (
+                                    <div>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>AI 텍스트 생성</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>브랜드명</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-input"
+                                                    value={aiTextForm.brand_name}
+                                                    onChange={(e) => setAiTextForm({...aiTextForm, brand_name: e.target.value})}
+                                                    placeholder="예: 스타벅스"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>제품/서비스</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-input"
+                                                    value={aiTextForm.product}
+                                                    onChange={(e) => setAiTextForm({...aiTextForm, product: e.target.value})}
+                                                    placeholder="예: 신메뉴 딸기 프라푸치노"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>목적</label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiTextForm.purpose}
+                                                    onChange={(e) => setAiTextForm({...aiTextForm, purpose: e.target.value})}
+                                                >
+                                                    <option value="promotion">프로모션</option>
+                                                    <option value="announcement">공지</option>
+                                                    <option value="engagement">참여유도</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>톤앤매너</label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiTextForm.tone}
+                                                    onChange={(e) => setAiTextForm({...aiTextForm, tone: e.target.value})}
+                                                >
+                                                    <option value="friendly">친근함</option>
+                                                    <option value="professional">전문적</option>
+                                                    <option value="exciting">흥미진진</option>
+                                                    <option value="luxurious">고급스러움</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>플랫폼</label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiTextForm.platform}
+                                                    onChange={(e) => setAiTextForm({...aiTextForm, platform: e.target.value})}
+                                                >
+                                                    <option value="instagram">Instagram</option>
+                                                    <option value="twitter">Twitter</option>
+                                                    <option value="facebook">Facebook</option>
+                                                    <option value="linkedin">LinkedIn</option>
+                                                </select>
+                                            </div>
+                                            <button 
+                                                className="btn-primary" 
+                                                onClick={generateAIText}
+                                                disabled={aiTextLoading || !aiTextForm.brand_name || !aiTextForm.product}
+                                                style={{ marginTop: '8px' }}
+                                            >
+                                                {aiTextLoading ? <span className="loading"></span> : '✍️ 텍스트 생성'}
+                                            </button>
+                                        </div>
+
+                                        {aiTextResults.length > 0 && (
+                                            <div style={{ marginTop: '20px' }}>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>생성된 카피</h4>
+                                                {aiTextResults.map((result, idx) => (
+                                                    <div 
+                                                        key={idx} 
+                                                        className="ai-result-card"
+                                                        onClick={() => addAITextToCanvas(result)}
+                                                    >
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                            <span style={{ fontWeight: '600' }}>카피 {idx + 1}</span>
+                                                            <span className="score-badge">{result.score}</span>
+                                                        </div>
+                                                        <p style={{ fontSize: '14px', marginBottom: '8px' }}>{result.text}</p>
+                                                        <div style={{ marginBottom: '8px' }}>
+                                                            {result.hashtags?.map((tag, i) => (
+                                                                <span key={i} className="hashtag">{tag}</span>
+                                                            ))}
+                                                        </div>
+                                                        <p style={{ fontSize: '12px', color: '#6b7280' }}>{result.reasoning}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'ai-image' && (
+                                    <div>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>🎨 AI 이미지 생성</h3>
+                                        
+                                        <div className="cost-badge" style={{ marginBottom: '16px', width: '100%' }}>
+                                            <strong>💰 비용:</strong> Standard $0.04/이미지, HD $0.08/이미지
+                                        </div>
+                                        
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+                                                    이미지 설명 (프롬프트) *
+                                                </label>
+                                                <textarea 
+                                                    className="form-input"
+                                                    value={aiImageForm.prompt}
+                                                    onChange={(e) => setAiImageForm({...aiImageForm, prompt: e.target.value})}
+                                                    placeholder="예: A cup of strawberry frappuccino on pink background, Starbucks style, commercial photography, natural lighting"
+                                                    rows={5}
+                                                    style={{ fontSize: '13px' }}
+                                                />
+                                                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                                                    💡 영어 프롬프트를 사용하면 더 좋은 결과를 얻을 수 있습니다
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+                                                    스타일
+                                                </label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiImageForm.style}
+                                                    onChange={(e) => setAiImageForm({...aiImageForm, style: e.target.value})}
+                                                >
+                                                    <option value="vivid">Vivid (생생하고 화려한)</option>
+                                                    <option value="natural">Natural (자연스러운)</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+                                                    크기
+                                                </label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiImageForm.size}
+                                                    onChange={(e) => setAiImageForm({...aiImageForm, size: e.target.value})}
+                                                >
+                                                    <option value="1024x1024">정사각형 (1024×1024)</option>
+                                                    <option value="1792x1024">가로형 (1792×1024)</option>
+                                                    <option value="1024x1792">세로형 (1024×1792)</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+                                                    품질
+                                                </label>
+                                                <select 
+                                                    className="form-input"
+                                                    value={aiImageForm.quality}
+                                                    onChange={(e) => setAiImageForm({...aiImageForm, quality: e.target.value})}
+                                                >
+                                                    <option value="standard">Standard ($0.04)</option>
+                                                    <option value="hd">HD - 고화질 ($0.08)</option>
+                                                </select>
+                                            </div>
+
+                                            <button 
+                                                className="btn-primary" 
+                                                onClick={generateAIImage}
+                                                disabled={aiImageLoading || !aiImageForm.prompt.trim()}
+                                                style={{ marginTop: '8px' }}
+                                            >
+                                                {aiImageLoading ? (
+                                                    <><span className="loading"></span> 생성 중...</>
+                                                ) : (
+                                                    '🎨 AI 이미지 생성'
+                                                )}
+                                            </button>
+                                        </div>
+
+                                        <div style={{ marginTop: '20px', padding: '12px', background: '#f3f4f6', borderRadius: '8px' }}>
+                                            <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                                                💡 프롬프트 예시 (클릭하여 사용)
+                                            </h4>
+                                            <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                                                <div 
+                                                    className="prompt-example"
+                                                    onClick={() => setAiImageForm({
+                                                        ...aiImageForm, 
+                                                        prompt: 'A cup of iced latte with latte art on a wooden cafe table, warm sunlight, cozy atmosphere, commercial photography, bokeh background'
+                                                    })}
+                                                >
+                                                    ☕ 카페 라떼 상업 사진
+                                                </div>
+                                                <div 
+                                                    className="prompt-example"
+                                                    onClick={() => setAiImageForm({
+                                                        ...aiImageForm, 
+                                                        prompt: 'Minimal product photography, white background, studio lighting, modern smartphone, clean composition, 4K quality'
+                                                    })}
+                                                >
+                                                    📱 미니멀 제품 사진
+                                                </div>
+                                                <div 
+                                                    className="prompt-example"
+                                                    onClick={() => setAiImageForm({
+                                                        ...aiImageForm, 
+                                                        prompt: 'Vibrant summer beach scene, pastel colors, Instagram aesthetic, golden hour lighting, dreamy atmosphere'
+                                                    })}
+                                                >
+                                                    🏖️ 여름 해변 인스타 감성
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {aiImageLoading && (
+                                            <div style={{ textAlign: 'center', marginTop: '20px', padding: '20px', background: '#f3f4f6', borderRadius: '8px' }}>
+                                                <div className="loading" style={{ margin: '0 auto' }}></div>
+                                                <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
+                                                    🎨 AI 이미지 생성 중...
+                                                </p>
+                                                <p style={{ marginTop: '8px', color: '#9ca3af', fontSize: '12px' }}>
+                                                    DALL-E 3가 이미지를 만들고 있습니다<br/>
+                                                    약 10-20초 소요됩니다
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {imageError && (
+                                            <div className="error-box">
+                                                <strong>❌ 오류:</strong> {imageError}
+                                            </div>
+                                        )}
+
+                                        {generatedImage && (
+                                            <div style={{ marginTop: '20px' }}>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>✨ 생성된 이미지</h4>
+                                                
+                                                <div className="image-preview">
+                                                    <img 
+                                                        src={generatedImage.image_url} 
+                                                        alt="AI Generated" 
+                                                        style={{ width: '100%', display: 'block' }}
+                                                    />
+                                                </div>
+
+                                                <div className="meta-info">
+                                                    <p><strong>원본 프롬프트:</strong><br/>{generatedImage.prompt}</p>
+                                                    {generatedImage.revised_prompt && (
+                                                        <p>
+                                                            <strong>최적화된 프롬프트:</strong><br/>
+                                                            {generatedImage.revised_prompt}
+                                                        </p>
+                                                    )}
+                                                    <p>
+                                                        <strong>설정:</strong> {generatedImage.style} / {generatedImage.size} / {generatedImage.quality}
+                                                    </p>
+                                                    <p>
+                                                        <strong>비용:</strong> ${generatedImage.meta.cost} USD
+                                                    </p>
+                                                </div>
+
+                                                <button 
+                                                    className="btn-primary"
+                                                    onClick={addAIImageToCanvas}
+                                                    style={{ width: '100%' }}
+                                                >
+                                                    ➕ 캔버스에 추가
+                                                </button>
+                                                
+                                                <button 
+                                                    className="btn-secondary"
+                                                    onClick={() => setGeneratedImage(null)}
+                                                    style={{ width: '100%', marginTop: '8px' }}
+                                                >
+                                                    🔄 다시 생성
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Canvas */}
+                        <div className="canvas-wrapper">
+                            <div 
+                                ref={canvasRef}
+                                className="canvas-container"
+                                style={{ 
+                                    width: canvasSize.width,
+                                    height: canvasSize.height,
+                                    transform: `scale(${zoom / 100})`
+                                }}
+                                onClick={(e) => {
+                                    if (e.target === canvasRef.current) {
+                                        setSelectedId(null);
+                                    }
+                                }}
+                            >
+                                {elements.map(element => (
+                                    <div
+                                        key={element.id}
+                                        className={`element ${selectedId === element.id ? 'selected' : ''}`}
+                                        style={{
+                                            left: element.x,
+                                            top: element.y,
+                                            width: element.width,
+                                            height: element.height,
+                                            transform: `rotate(${element.rotation}deg)`,
+                                            background: element.type !== 'text' && element.type !== 'image' ? element.fill : 'transparent',
+                                            color: element.type === 'text' ? element.fill : 'transparent',
+                                            fontSize: element.fontSize,
+                                            fontWeight: element.fontWeight,
+                                            fontFamily: element.fontFamily || 'Noto Sans KR',
+                                            opacity: element.opacity,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: element.type === 'circle' ? '50%' : '0',
+                                            clipPath: element.type === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
+                                            wordBreak: 'break-word',
+                                            padding: element.type === 'text' ? '8px' : '0',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'pre-wrap'
+                                        }}
+                                        onMouseDown={(e) => handleMouseDown(e, element.id)}
+                                    >
+                                        {element.type === 'text' && element.text}
+                                        {element.type === 'image' && element.imageUrl && (
+                                            <img src={element.imageUrl} alt="uploaded" />
+                                        )}
+                                        
+                                        {selectedId === element.id && (
+                                            <>
+                                                <div className="resize-handle nw"></div>
+                                                <div className="resize-handle ne"></div>
+                                                <div className="resize-handle sw"></div>
+                                                <div className="resize-handle se"></div>
+                                                <div className="rotate-handle"></div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Properties Panel */}
+                        <div className="properties-panel">
+                            <div style={{ padding: '20px' }}>
+                                {selectedElement ? (
+                                    <div>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>속성</h3>
+                                        
+                                        {selectedElement.type === 'text' && (
+                                            <>
+                                                <div style={{ marginBottom: '16px' }}>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>텍스트</label>
+                                                    <textarea 
+                                                        className="form-input"
+                                                        value={selectedElement.text}
+                                                        onChange={(e) => updateProperty('text', e.target.value)}
+                                                        rows={3}
+                                                    />
+                                                </div>
+
+                                                <div style={{ marginBottom: '16px' }}>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>폰트</label>
+                                                    <select 
+                                                        className="form-input"
+                                                        value={selectedElement.fontFamily || 'Noto Sans KR'}
+                                                        onChange={(e) => updateProperty('fontFamily', e.target.value)}
+                                                    >
+                                                        {FONTS.map(font => (
+                                                            <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                                                                {font.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div style={{ marginBottom: '16px' }}>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
+                                                        글자 크기: {selectedElement.fontSize}px
+                                                    </label>
+                                                    <input 
+                                                        type="range" 
+                                                        min="12" 
+                                                        max="120"
+                                                        value={selectedElement.fontSize}
+                                                        onChange={(e) => updateProperty('fontSize', parseInt(e.target.value))}
+                                                    />
+                                                </div>
+
+                                                <div style={{ marginBottom: '16px' }}>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>굵기</label>
+                                                    <select 
+                                                        className="form-input"
+                                                        value={selectedElement.fontWeight || 'normal'}
+                                                        onChange={(e) => updateProperty('fontWeight', e.target.value)}
+                                                    >
+                                                        <option value="normal">Normal</option>
+                                                        <option value="500">Medium</option>
+                                                        <option value="bold">Bold</option>
+                                                        <option value="900">Black</option>
+                                                    </select>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {selectedElement.type !== 'image' && (
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>색상</label>
+                                                <input 
+                                                    type="color" 
+                                                    value={selectedElement.fill}
+                                                    onChange={(e) => updateProperty('fill', e.target.value)}
+                                                    style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
+                                                불투명도: {Math.round(selectedElement.opacity * 100)}%
+                                            </label>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="1"
+                                                step="0.01"
+                                                value={selectedElement.opacity}
+                                                onChange={(e) => updateProperty('opacity', parseFloat(e.target.value))}
+                                            />
+                                        </div>
+
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
+                                                회전: {Math.round(selectedElement.rotation)}°
+                                            </label>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="360"
+                                                value={selectedElement.rotation}
+                                                onChange={(e) => updateProperty('rotation', parseInt(e.target.value))}
+                                            />
+                                        </div>
+
+                                        <button 
+                                            className="btn-secondary" 
+                                            onClick={deleteElement}
+                                            style={{ width: '100%', color: '#ef4444' }}
+                                        >
+                                            🗑️ 삭제 <span className="keyboard-hint">Delete</span>
+                                        </button>
+
+                                        {selectedElement.type === 'text' && (
+                                            <button 
+                                                className="btn-primary" 
+                                                onClick={predictPerformance}
+                                                style={{ width: '100%', marginTop: '12px' }}
+                                            >
+                                                📊 성과 예측
+                                            </button>
+                                        )}
+
+                                        {predictionData && (
+                                            <div style={{ marginTop: '20px', padding: '16px', background: '#f3f4f6', borderRadius: '8px' }}>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>예측 결과</h4>
+                                                <div style={{ fontSize: '14px' }}>
+                                                    <p>인게이지먼트율: {predictionData.predictions.engagement_rate.value}%</p>
+                                                    <p>예상 도달: {predictionData.predictions.estimated_reach.toLocaleString()}</p>
+                                                    <p>예상 좋아요: {predictionData.predictions.estimated_likes.toLocaleString()}</p>
+                                                    <div style={{ marginTop: '12px' }}>
+                                                        <strong>개선 제안:</strong>
+                                                        {predictionData.recommendations.map((rec, idx) => (
+                                                            <p key={idx} style={{ marginTop: '4px', fontSize: '13px' }}>
+                                                                • {rec.suggestion} ({rec.impact})
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', color: '#6b7280', marginTop: '40px' }}>
+                                        <p>요소를 선택하면</p>
+                                        <p>속성을 편집할 수 있습니다</p>
+                                    </div>
+                                )}
+
+                                {trendingData && (
+                                    <div style={{ marginTop: '40px' }}>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>트렌딩 토픽</h3>
+                                        <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
+                                            💡 현재 인기 키워드 (샘플 데이터)
+                                        </p>
+                                        {trendingData.trending_topics.slice(0, 4).map((topic, idx) => (
+                                            <div key={idx} className="trend-card">
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                                    <span style={{ fontWeight: '600' }}>{topic.keyword}</span>
+                                                    <span className="trend-growth">↑ {topic.growth_rate}%</span>
+                                                </div>
+                                                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                                                    {topic.volume.toLocaleString()} mentions
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Status Bar */}
+                    <div style={{ 
+                        borderTop: '1px solid #e5e7eb', 
+                        padding: '8px 20px', 
+                        background: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        fontSize: '14px',
+                        color: '#6b7280'
+                    }}>
+                        <div>
+                            요소: {elements.length}개 | 선택: {selectedId ? '1개' : '0개'}
+                            <span style={{ marginLeft: '12px', color: '#9ca3af' }}>
+                                | History: {history.past.length} undo, {history.future.length} redo
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <button onClick={() => setZoom(Math.max(25, zoom - 25))}>-</button>
+                            <span>{zoom}%</span>
+                            <button onClick={() => setZoom(Math.min(200, zoom + 25))}>+</button>
+                            <span>| {canvasSize.width} × {canvasSize.height}px</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CanvasEditor />, document.getElementById('root'));
+    </script>
+</body>
+</html>

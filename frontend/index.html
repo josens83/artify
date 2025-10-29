@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artify - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+        }
+
+        .projects-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .project-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .project-thumbnail {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+        }
+
+        .project-info {
+            padding: 20px;
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .project-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Artify</div>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
+            </div>
+        </div>
+
+        <div class="projects-section">
+            <div class="section-header">
+                <h2 class="section-title">내 프로젝트</h2>
+                <button class="btn btn-primary" onclick="createNewProject()">
+                    ✨ 새 프로젝트
+                </button>
+            </div>
+
+            <div id="projectsContainer" class="loading">
+                프로젝트를 불러오는 중...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+
+        // 토큰 확인
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+
+        // 사용자 정보 로드
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            document.getElementById('userName').textContent = `${user.name}님`;
+        }
+
+        // 프로젝트 목록 로드
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/projects`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const projects = await response.json();
+                    displayProjects(projects);
+                } else if (response.status === 401) {
+                    localStorage.clear();
+                    window.location.href = '/login.html';
+                } else {
+                    throw new Error('Failed to load projects');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('projectsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-text">프로젝트를 불러오는데 실패했습니다</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 프로젝트 표시
+        function displayProjects(projects) {
+            const container = document.getElementById('projectsContainer');
+
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📁</div>
+                        <div class="empty-state-text">아직 프로젝트가 없습니다</div>
+                        <p style="color: #999; margin-top: 10px;">새 프로젝트를 만들어보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            container.className = 'projects-grid';
+
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                
+                const date = new Date(project.updated_at).toLocaleDateString('ko-KR');
+                
+                card.innerHTML = `
+                    <div class="project-thumbnail" onclick="openProject(${project.id})">
+                        🎨
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">${project.title}</div>
+                        <div class="project-date">수정: ${date}</div>
+                        <div class="project-actions">
+                            <button class="btn btn-primary btn-small" onclick="openProject(${project.id})">
+                                열기
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteProject(event, ${project.id})">
+                                삭제
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 새 프로젝트 생성
+        async function createNewProject() {
+            try {
+                const response = await fetch(`${API_URL}/projects`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: 'Untitled Project',
+                        canvas_width: 800,
+                        canvas_height: 1000
+                    })
+                });
+
+                if (response.ok) {
+                    const project = await response.json();
+                    window.location.href = `/editor.html?id=${project.id}`;
+                } else {
+                    alert('프로젝트 생성에 실패했습니다');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('프로젝트 생성 중 오류가 발생했습니다');
+            }
+        }
+
+        // 프로젝트 열기
+        function openProject(projectId) {
+            window.location.href = `/editor.html?id=${projectId}`;
+        }
+
+        // 프로젝트 삭제
+        async function deleteProject(event, projectId) {
+            event.stopPropagation();
+            
+            if (!confirm('정말 이 프로젝트를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/projects/${projectId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    loadProjects();
+                } else {
+                    alert('프로젝트 삭제에 실패했습니다');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('프로젝트 삭제 중 오류가 발생했습니다');
+            }
+        }
+
+        // 로그아웃
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        // 페이지 로드 시 프로젝트 목록 로드
+        loadProjects();
+    </script>
+</body>
+</html>
