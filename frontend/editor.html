@@ -419,9 +419,14 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
-
-        const API_URL = 'http://localhost:3001/api';
-        const PYTHON_API_URL = 'http://localhost:8000/api';
+       
+        // 수정 (환경에 따라 자동 전환)
+        const API_URL_PRODUCTION = window.location.hostname === 'localhost' 
+            ? 'https://artify-api.railway.app/api'
+            : '';  // 나중에 Railway URL로 변경
+        const PYTHON_API_URL_PRODUCTION = window.location.hostname === 'localhost'
+            ? 'https://artify-python.onrender.com/api'
+            : '';  // 나중에 Render URL로 변경
 
         const TEMPLATES = [
             {

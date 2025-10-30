@@ -1,0 +1,23 @@
+{
+    "version": 2,
+    "name": "artify",
+    "builds": [
+      {
+        "src": "frontend/**",
+        "use": "@vercel/static"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/frontend/(.*)",
+        "dest": "/frontend/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/frontend/$1"
+      }
+    ],
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
