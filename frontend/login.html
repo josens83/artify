@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -134,44 +134,45 @@
             to { transform: rotate(360deg); }
         }
     </style>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="login-container">
         <h1 class="logo">Artify</h1>
-        <p class="subtitle">AI 기반 디자인 에디터</p>
+        <p class="subtitle">AI 湲곕컲 ?붿옄???먮뵒??/p>
         
         <div id="errorMessage" class="error-message"></div>
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="email">이메일</label>
+                <label for="email">?대찓??/label>
                 <input type="email" id="email" name="email" required placeholder="your@email.com">
             </div>
             
             <div class="form-group">
-                <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
+                <label for="password">鍮꾨?踰덊샇</label>
+                <input type="password" id="password" name="password" required placeholder="?™™™™™™™?>
             </div>
             
             <button type="submit" class="btn" id="loginBtn">
-                로그인
+                濡쒓렇??
             </button>
         </form>
         
         <div class="register-link">
-            계정이 없으신가요? <a href="/register.html">회원가입</a>
+            怨꾩젙???놁쑝?좉??? <a href="/register.html">?뚯썝媛??/a>
         </div>
     </div>
 
     <script>
-        // 수정 (환경에 따라 자동 전환)
+        // ?섏젙 (?섍꼍???곕씪 ?먮룞 ?꾪솚)
         const API_URL_PRODUCTION = window.location.hostname === 'localhost' 
         ? 'http://localhost:3001/api'
-        : 'https://artify-api.railway.app/api';  // 나중에 Railway URL로 변경
+        : 'https://artify-api.railway.app/api';  // ?섏쨷??Railway URL濡?蹂寃?
 
         const PYTHON_API_URL = window.location.hostname === 'localhost'
         ? 'http://localhost:8000/api'
-        : 'https://artify-python.onrender.com/api';  // 나중에 Render URL로 변경
+        : 'https://artify-python.onrender.com/api';  // ?섏쨷??Render URL濡?蹂寃?
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -181,11 +182,11 @@
             const errorDiv = document.getElementById('errorMessage');
             const loginBtn = document.getElementById('loginBtn');
             
-            // 버튼 비활성화
+            // 踰꾪듉 鍮꾪솢?깊솕
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<span class="loading"></span>';
             
-            // 에러 메시지 숨기기
+            // ?먮윭 硫붿떆吏 ?④린湲?
             errorDiv.style.display = 'none';
             
             try {
@@ -200,29 +201,29 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // 토큰과 사용자 정보 저장
+                    // ?좏겙怨??ъ슜???뺣낫 ???
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    // 대시보드로 이동
+                    // ??쒕낫?쒕줈 ?대룞
                     window.location.href = '/index.html';
                 } else {
-                    // 에러 표시
-                    errorDiv.textContent = data.message || '로그인에 실패했습니다';
+                    // ?먮윭 ?쒖떆
+                    errorDiv.textContent = data.message || '濡쒓렇?몄뿉 ?ㅽ뙣?덉뒿?덈떎';
                     errorDiv.style.display = 'block';
                     
-                    // 버튼 재활성화
+                    // 踰꾪듉 ?ы솢?깊솕
                     loginBtn.disabled = false;
-                    loginBtn.textContent = '로그인';
+                    loginBtn.textContent = '濡쒓렇??;
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                errorDiv.textContent = '서버 연결에 실패했습니다';
+                errorDiv.textContent = '?쒕쾭 ?곌껐???ㅽ뙣?덉뒿?덈떎';
                 errorDiv.style.display = 'block';
                 
-                // 버튼 재활성화
+                // 踰꾪듉 ?ы솢?깊솕
                 loginBtn.disabled = false;
-                loginBtn.textContent = '로그인';
+                loginBtn.textContent = '濡쒓렇??;
             }
         });
     </script>

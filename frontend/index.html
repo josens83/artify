@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -187,6 +187,7 @@
             color: #666;
         }
     </style>
+    <script src="config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -194,46 +195,44 @@
             <div class="logo">Artify</div>
             <div class="user-info">
                 <span id="userName">Loading...</span>
-                <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
+                <button class="btn btn-secondary" onclick="logout()">濡쒓렇?꾩썐</button>
             </div>
         </div>
 
         <div class="projects-section">
             <div class="section-header">
-                <h2 class="section-title">내 프로젝트</h2>
+                <h2 class="section-title">???꾨줈?앺듃</h2>
                 <button class="btn btn-primary" onclick="createNewProject()">
-                    ✨ 새 프로젝트
+                    ?????꾨줈?앺듃
                 </button>
             </div>
 
             <div id="projectsContainer" class="loading">
-                프로젝트를 불러오는 중...
+                ?꾨줈?앺듃瑜?遺덈윭?ㅻ뒗 以?..
             </div>
         </div>
     </div>
 
     <script>
-        // 수정 (환경에 따라 자동 전환)
+        // ?섏젙 (?섍꼍???곕씪 ?먮룞 ?꾪솚)
         const API_URL_PRODUCTION = window.location.hostname === 'localhost' 
             ? 'https://artify-api.railway.app/api'
-            : '';  // 나중에 Railway URL로 변경
-        const PYTHON_API_URL_PRODUCTION = window.location.hostname === 'localhost'
+            : '';  // ?섏쨷??Railway URL濡?蹂寃?        const PYTHON_API_URL_PRODUCTION = window.location.hostname === 'localhost'
             ? 'https://artify-python.onrender.com/api'
-            : '';  // 나중에 Render URL로 변경
-
-        // 토큰 확인
+            : '';  // ?섏쨷??Render URL濡?蹂寃?
+        // ?좏겙 ?뺤씤
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = '/login.html';
         }
 
-        // 사용자 정보 로드
+        // ?ъ슜???뺣낫 濡쒕뱶
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
-            document.getElementById('userName').textContent = `${user.name}님`;
+            document.getElementById('userName').textContent = `${user.name}??;
         }
 
-        // 프로젝트 목록 로드
+        // ?꾨줈?앺듃 紐⑸줉 濡쒕뱶
         async function loadProjects() {
             try {
                 const response = await fetch(`${API_URL}/projects`, {
@@ -255,23 +254,23 @@
                 console.error('Error:', error);
                 document.getElementById('projectsContainer').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <div class="empty-state-text">프로젝트를 불러오는데 실패했습니다</div>
+                        <div class="empty-state-icon">?좑툘</div>
+                        <div class="empty-state-text">?꾨줈?앺듃瑜?遺덈윭?ㅻ뒗???ㅽ뙣?덉뒿?덈떎</div>
                     </div>
                 `;
             }
         }
 
-        // 프로젝트 표시
+        // ?꾨줈?앺듃 ?쒖떆
         function displayProjects(projects) {
             const container = document.getElementById('projectsContainer');
 
             if (projects.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">📁</div>
-                        <div class="empty-state-text">아직 프로젝트가 없습니다</div>
-                        <p style="color: #999; margin-top: 10px;">새 프로젝트를 만들어보세요!</p>
+                        <div class="empty-state-icon">?뱚</div>
+                        <div class="empty-state-text">?꾩쭅 ?꾨줈?앺듃媛 ?놁뒿?덈떎</div>
+                        <p style="color: #999; margin-top: 10px;">???꾨줈?앺듃瑜?留뚮뱾?대낫?몄슂!</p>
                     </div>
                 `;
                 return;
@@ -288,17 +287,17 @@
                 
                 card.innerHTML = `
                     <div class="project-thumbnail" onclick="openProject(${project.id})">
-                        🎨
+                        ?렓
                     </div>
                     <div class="project-info">
                         <div class="project-title">${project.title}</div>
-                        <div class="project-date">수정: ${date}</div>
+                        <div class="project-date">?섏젙: ${date}</div>
                         <div class="project-actions">
                             <button class="btn btn-primary btn-small" onclick="openProject(${project.id})">
-                                열기
+                                ?닿린
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteProject(event, ${project.id})">
-                                삭제
+                                ??젣
                             </button>
                         </div>
                     </div>
@@ -308,7 +307,7 @@
             });
         }
 
-        // 새 프로젝트 생성
+        // ???꾨줈?앺듃 ?앹꽦
         async function createNewProject() {
             try {
                 const response = await fetch(`${API_URL}/projects`, {
@@ -328,24 +327,24 @@
                     const project = await response.json();
                     window.location.href = `/editor.html?id=${project.id}`;
                 } else {
-                    alert('프로젝트 생성에 실패했습니다');
+                    alert('?꾨줈?앺듃 ?앹꽦???ㅽ뙣?덉뒿?덈떎');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('프로젝트 생성 중 오류가 발생했습니다');
+                alert('?꾨줈?앺듃 ?앹꽦 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎');
             }
         }
 
-        // 프로젝트 열기
+        // ?꾨줈?앺듃 ?닿린
         function openProject(projectId) {
             window.location.href = `/editor.html?id=${projectId}`;
         }
 
-        // 프로젝트 삭제
+        // ?꾨줈?앺듃 ??젣
         async function deleteProject(event, projectId) {
             event.stopPropagation();
             
-            if (!confirm('정말 이 프로젝트를 삭제하시겠습니까?')) {
+            if (!confirm('?뺣쭚 ???꾨줈?앺듃瑜???젣?섏떆寃좎뒿?덇퉴?')) {
                 return;
             }
 
@@ -360,21 +359,21 @@
                 if (response.ok) {
                     loadProjects();
                 } else {
-                    alert('프로젝트 삭제에 실패했습니다');
+                    alert('?꾨줈?앺듃 ??젣???ㅽ뙣?덉뒿?덈떎');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('프로젝트 삭제 중 오류가 발생했습니다');
+                alert('?꾨줈?앺듃 ??젣 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎');
             }
         }
 
-        // 로그아웃
+        // 濡쒓렇?꾩썐
         function logout() {
             localStorage.clear();
             window.location.href = '/login.html';
         }
 
-        // 페이지 로드 시 프로젝트 목록 로드
+        // ?섏씠吏 濡쒕뱶 ???꾨줈?앺듃 紐⑸줉 濡쒕뱶
         loadProjects();
     </script>
 </body>

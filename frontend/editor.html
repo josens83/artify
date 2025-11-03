@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -413,6 +413,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
     </style>
+    <script src="config.js"></script>
 </head>
 <body>
     <div id="root"></div>
@@ -420,19 +421,19 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
        
-        // 수정 (환경에 따라 자동 전환)
+        // ?섏젙 (?섍꼍???곕씪 ?먮룞 ?꾪솚)
         const API_URL_PRODUCTION = window.location.hostname === 'localhost' 
             ? 'https://artify-api.railway.app/api'
-            : '';  // 나중에 Railway URL로 변경
+            : '';  // ?섏쨷??Railway URL濡?蹂寃?
         const PYTHON_API_URL_PRODUCTION = window.location.hostname === 'localhost'
             ? 'https://artify-python.onrender.com/api'
-            : '';  // 나중에 Render URL로 변경
+            : '';  // ?섏쨷??Render URL濡?蹂寃?
 
         const TEMPLATES = [
             {
                 id: 'instagram-post',
                 name: 'Instagram Post',
-                icon: '📱',
+                icon: '?벑',
                 width: 1080,
                 height: 1080,
                 elements: [
@@ -456,7 +457,7 @@
                         height: 280,
                         rotation: 0,
                         fill: '#FFFFFF',
-                        text: '여기에 텍스트를\n입력하세요',
+                        text: '?ш린???띿뒪?몃?\n?낅젰?섏꽭??,
                         fontSize: 96,
                         fontWeight: 'bold',
                         fontFamily: 'Montserrat',
@@ -467,7 +468,7 @@
             {
                 id: 'instagram-story',
                 name: 'Instagram Story',
-                icon: '📱',
+                icon: '?벑',
                 width: 1080,
                 height: 1920,
                 elements: [
@@ -502,7 +503,7 @@
             {
                 id: 'facebook-post',
                 name: 'Facebook Post',
-                icon: '👍',
+                icon: '?몟',
                 width: 1200,
                 height: 630,
                 elements: [
@@ -537,7 +538,7 @@
             {
                 id: 'twitter-post',
                 name: 'Twitter Post',
-                icon: '🐦',
+                icon: '?맔',
                 width: 1200,
                 height: 675,
                 elements: [
@@ -571,8 +572,8 @@
             },
             {
                 id: 'blank',
-                name: '빈 캔버스',
-                icon: '⬜',
+                name: '鍮?罹붾쾭??,
+                icon: '燧?,
                 width: 800,
                 height: 1000,
                 elements: []
@@ -686,7 +687,7 @@
 
             const exportCanvas = async (format = 'png') => {
                 if (!canvasRef.current) {
-                    alert('캔버스를 찾을 수 없습니다.');
+                    alert('罹붾쾭?ㅻ? 李얠쓣 ???놁뒿?덈떎.');
                     return;
                 }
 
@@ -717,12 +718,12 @@
 
                         setSelectedId(tempSelectedId);
                         setExporting(false);
-                        alert(`✅ ${format.toUpperCase()} 다운로드 완료!`);
+                        alert(`??${format.toUpperCase()} ?ㅼ슫濡쒕뱶 ?꾨즺!`);
                     }, `image/${format}`, format === 'jpeg' ? 0.95 : 1.0);
 
                 } catch (error) {
                     console.error('Export error:', error);
-                    alert('내보내기에 실패했습니다.');
+                    alert('?대낫?닿린???ㅽ뙣?덉뒿?덈떎.');
                     setExporting(false);
                     setSelectedId(selectedId);
                 }
@@ -870,11 +871,11 @@
                     });
 
                     if (response.ok) {
-                        alert('저장되었습니다!');
+                        alert('??λ릺?덉뒿?덈떎!');
                     }
                 } catch (error) {
                     console.error('Failed to save project:', error);
-                    alert('저장에 실패했습니다.');
+                    alert('??μ뿉 ?ㅽ뙣?덉뒿?덈떎.');
                 }
             };
 
@@ -890,7 +891,7 @@
                     fill: type === 'rectangle' ? '#ff6b6b' : 
                           type === 'circle' ? '#4ecdc4' : 
                           type === 'triangle' ? '#ffe66d' : '#000000',
-                    text: type === 'text' ? '텍스트를 입력하세요' : '',
+                    text: type === 'text' ? '?띿뒪?몃? ?낅젰?섏꽭?? : '',
                     imageUrl: type === 'image' ? '' : null,
                     fontSize: 24,
                     fontWeight: 'normal',
@@ -905,12 +906,12 @@
                 if (!file) return;
 
                 if (!file.type.startsWith('image/')) {
-                    alert('이미지 파일만 업로드 가능합니다.');
+                    alert('?대?吏 ?뚯씪留??낅줈??媛?ν빀?덈떎.');
                     return;
                 }
 
                 if (file.size > 10 * 1024 * 1024) {
-                    alert('파일 크기는 10MB 이하여야 합니다.');
+                    alert('?뚯씪 ?ш린??10MB ?댄븯?ъ빞 ?⑸땲??');
                     return;
                 }
 
@@ -932,11 +933,11 @@
                         const data = await response.json();
                         addImageToCanvas(`http://localhost:3001${data.url}`);
                     } else {
-                        alert('업로드에 실패했습니다.');
+                        alert('?낅줈?쒖뿉 ?ㅽ뙣?덉뒿?덈떎.');
                     }
                 } catch (error) {
                     console.error('Upload error:', error);
-                    alert('이미지 업로드 중 오류가 발생했습니다.');
+                    alert('?대?吏 ?낅줈??以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.');
                 } finally {
                     setUploading(false);
                 }
@@ -1000,11 +1001,11 @@
                         const data = await response.json();
                         setAiTextResults(data.copies);
                     } else {
-                        alert('AI 텍스트 생성에 실패했습니다.');
+                        alert('AI ?띿뒪???앹꽦???ㅽ뙣?덉뒿?덈떎.');
                     }
                 } catch (error) {
                     console.error('AI text generation error:', error);
-                    alert('AI 텍스트 생성 중 오류가 발생했습니다.');
+                    alert('AI ?띿뒪???앹꽦 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.');
                 } finally {
                     setAiTextLoading(false);
                 }
@@ -1033,7 +1034,7 @@
 
             const generateAIImage = async () => {
                 if (!aiImageForm.prompt.trim()) {
-                    alert('이미지 설명을 입력해주세요.');
+                    alert('?대?吏 ?ㅻ챸???낅젰?댁＜?몄슂.');
                     return;
                 }
 
@@ -1054,15 +1055,15 @@
 
                     if (response.ok && data.success) {
                         setGeneratedImage(data);
-                        console.log('✅ 이미지 생성 성공:', data);
+                        console.log('???대?吏 ?앹꽦 ?깃났:', data);
                     } else {
-                        setImageError(data.detail || 'AI 이미지 생성에 실패했습니다.');
-                        alert(data.detail || 'AI 이미지 생성에 실패했습니다.');
+                        setImageError(data.detail || 'AI ?대?吏 ?앹꽦???ㅽ뙣?덉뒿?덈떎.');
+                        alert(data.detail || 'AI ?대?吏 ?앹꽦???ㅽ뙣?덉뒿?덈떎.');
                     }
                 } catch (error) {
                     console.error('AI image generation error:', error);
-                    setImageError('네트워크 오류가 발생했습니다.');
-                    alert('AI 이미지 생성 중 오류가 발생했습니다.');
+                    setImageError('?ㅽ듃?뚰겕 ?ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.');
+                    alert('AI ?대?吏 ?앹꽦 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.');
                 } finally {
                     setAiImageLoading(false);
                 }
@@ -1091,7 +1092,7 @@
             const predictPerformance = async () => {
                 const selectedElement = elements.find(el => el.id === selectedId);
                 if (!selectedElement || selectedElement.type !== 'text') {
-                    alert('텍스트 요소를 선택해주세요.');
+                    alert('?띿뒪???붿냼瑜??좏깮?댁＜?몄슂.');
                     return;
                 }
 
@@ -1208,7 +1209,7 @@
                                 onClick={() => setShowTemplateModal(true)}
                                 style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}
                             >
-                                📋 템플릿
+                                ?뱥 ?쒗뵆由?
                             </button>
                             
                             <input 
@@ -1224,49 +1225,49 @@
                                     className="history-button"
                                     onClick={undo}
                                     disabled={history.past.length === 0}
-                                    title="되돌리기 (Ctrl+Z)"
+                                    title="?섎룎由ш린 (Ctrl+Z)"
                                 >
-                                    ↶ <span className="keyboard-hint">Ctrl+Z</span>
+                                    ??<span className="keyboard-hint">Ctrl+Z</span>
                                 </button>
                                 <button 
                                     className="history-button"
                                     onClick={redo}
                                     disabled={history.future.length === 0}
-                                    title="다시하기 (Ctrl+Y)"
+                                    title="?ㅼ떆?섍린 (Ctrl+Y)"
                                 >
-                                    ↷ <span className="keyboard-hint">Ctrl+Y</span>
+                                    ??<span className="keyboard-hint">Ctrl+Y</span>
                                 </button>
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button className="btn-primary" onClick={saveProject}>
-                                💾 저장
+                                ?뮶 ???
                             </button>
                             <button 
                                 className="btn-primary" 
                                 onClick={() => exportCanvas('png')}
                                 disabled={exporting}
                             >
-                                {exporting ? '처리 중...' : '⬇️ PNG'}
+                                {exporting ? '泥섎━ 以?..' : '燧뉛툘 PNG'}
                             </button>
                             <button 
                                 className="btn-secondary" 
                                 onClick={() => exportCanvas('jpeg')}
                                 disabled={exporting}
                             >
-                                ⬇️ JPG
+                                燧뉛툘 JPG
                             </button>
                             <button 
                                 className="btn-secondary" 
                                 onClick={auth.logout}
                                 style={{ marginLeft: '20px' }}
                             >
-                                👤 {auth.getUser()?.name}
+                                ?뫀 {auth.getUser()?.name}
                             </button>
                         </div>
                     </div>
 
-                    {/* 템플릿 모달 */}
+                    {/* ?쒗뵆由?紐⑤떖 */}
                     {showTemplateModal && (
                         <div style={{
                             position: 'fixed',
@@ -1290,12 +1291,12 @@
                                 overflow: 'auto'
                             }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                                    <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>템플릿 선택</h2>
+                                    <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>?쒗뵆由??좏깮</h2>
                                     <button 
                                         onClick={() => setShowTemplateModal(false)}
                                         style={{ fontSize: '24px', cursor: 'pointer', background: 'none', border: 'none' }}
                                     >
-                                        ✕
+                                        ??
                                     </button>
                                 </div>
 
@@ -1313,7 +1314,7 @@
                                                 {template.name}
                                             </h3>
                                             <p style={{ fontSize: '13px', color: '#6b7280' }}>
-                                                {template.width} × {template.height}px
+                                                {template.width} 횞 {template.height}px
                                             </p>
                                         </div>
                                     ))}
@@ -1322,7 +1323,7 @@
                         </div>
                     )}
 
-                    {/* 내보내기 중 오버레이 */}
+                    {/* ?대낫?닿린 以??ㅻ쾭?덉씠 */}
                     {exporting && (
                         <div style={{
                             position: 'fixed',
@@ -1340,7 +1341,7 @@
                         }}>
                             <div className="loading" style={{ width: '50px', height: '50px', borderWidth: '5px' }}></div>
                             <p style={{ color: 'white', fontSize: '18px', fontWeight: '500' }}>
-                                이미지 내보내는 중...
+                                ?대?吏 ?대낫?대뒗 以?..
                             </p>
                         </div>
                     )}
@@ -1353,48 +1354,48 @@
                                     className={`tab-button ${activeTab === 'elements' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('elements')}
                                 >
-                                    ⭐ 요소
+                                    狩??붿냼
                                 </button>
                                 <button 
                                     className={`tab-button ${activeTab === 'upload' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('upload')}
                                 >
-                                    📁 업로드
+                                    ?뱚 ?낅줈??
                                 </button>
                                 <button 
                                     className={`tab-button ${activeTab === 'ai-text' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('ai-text')}
                                 >
-                                    ✍️ AI 텍스트
+                                    ?랃툘 AI ?띿뒪??
                                 </button>
                                 <button 
                                     className={`tab-button ${activeTab === 'ai-image' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('ai-image')}
                                 >
-                                    🎨 AI 이미지
+                                    ?렓 AI ?대?吏
                                 </button>
                             </div>
 
                             <div style={{ padding: '20px' }}>
                                 {activeTab === 'elements' && (
                                     <div>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>도형 추가</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>?꾪삎 異붽?</h3>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                             <button className="shape-button" onClick={() => addElement('rectangle')}>
                                                 <div style={{ width: '60px', height: '40px', background: '#ff6b6b', margin: '0 auto' }}></div>
-                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>사각형</p>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>?ш컖??/p>
                                             </button>
                                             <button className="shape-button" onClick={() => addElement('circle')}>
                                                 <div style={{ width: '50px', height: '50px', background: '#4ecdc4', borderRadius: '50%', margin: '0 auto' }}></div>
-                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>원</p>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>??/p>
                                             </button>
                                             <button className="shape-button" onClick={() => addElement('triangle')}>
                                                 <div style={{ width: 0, height: 0, borderLeft: '30px solid transparent', borderRight: '30px solid transparent', borderBottom: '50px solid #ffe66d', margin: '0 auto' }}></div>
-                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>삼각형</p>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>?쇨컖??/p>
                                             </button>
                                             <button className="shape-button" onClick={() => addElement('text')}>
                                                 <div style={{ fontSize: '32px' }}>T</div>
-                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>텍스트</p>
+                                                <p style={{ marginTop: '8px', fontSize: '14px' }}>?띿뒪??/p>
                                             </button>
                                         </div>
                                     </div>
@@ -1402,7 +1403,7 @@
 
                                 {activeTab === 'upload' && (
                                     <div>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>이미지 업로드</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>?대?吏 ?낅줈??/h3>
                                         
                                         <input 
                                             type="file"
@@ -1417,7 +1418,7 @@
                                             onClick={() => fileInputRef.current.click()}
                                             disabled={uploading}
                                         >
-                                            {uploading ? '업로드 중...' : '📁 파일 선택'}
+                                            {uploading ? '?낅줈??以?..' : '?뱚 ?뚯씪 ?좏깮'}
                                         </button>
 
                                         <div 
@@ -1428,13 +1429,13 @@
                                             onClick={() => fileInputRef.current.click()}
                                         >
                                             <div style={{ fontSize: '48px', marginBottom: '12px' }}>
-                                                📷
+                                                ?벜
                                             </div>
                                             <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                                                이미지를 드래그하거나<br/>클릭하여 업로드
+                                                ?대?吏瑜??쒕옒洹명븯嫄곕굹<br/>?대┃?섏뿬 ?낅줈??
                                             </p>
                                             <p style={{ color: '#9ca3af', fontSize: '12px', marginTop: '8px' }}>
-                                                JPG, PNG, GIF, WEBP (최대 10MB)
+                                                JPG, PNG, GIF, WEBP (理쒕? 10MB)
                                             </p>
                                         </div>
 
@@ -1442,7 +1443,7 @@
                                             <div style={{ textAlign: 'center', marginTop: '20px' }}>
                                                 <div className="loading"></div>
                                                 <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
-                                                    업로드 중...
+                                                    ?낅줈??以?..
                                                 </p>
                                             </div>
                                         )}
@@ -1451,55 +1452,55 @@
 
                                 {activeTab === 'ai-text' && (
                                     <div>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>AI 텍스트 생성</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>AI ?띿뒪???앹꽦</h3>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             <div>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>브랜드명</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>釉뚮옖?쒕챸</label>
                                                 <input 
                                                     type="text" 
                                                     className="form-input"
                                                     value={aiTextForm.brand_name}
                                                     onChange={(e) => setAiTextForm({...aiTextForm, brand_name: e.target.value})}
-                                                    placeholder="예: 스타벅스"
+                                                    placeholder="?? ?ㅽ?踰낆뒪"
                                                 />
                                             </div>
                                             <div>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>제품/서비스</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?쒗뭹/?쒕퉬??/label>
                                                 <input 
                                                     type="text" 
                                                     className="form-input"
                                                     value={aiTextForm.product}
                                                     onChange={(e) => setAiTextForm({...aiTextForm, product: e.target.value})}
-                                                    placeholder="예: 신메뉴 딸기 프라푸치노"
+                                                    placeholder="?? ?좊찓???멸린 ?꾨씪?몄튂??
                                                 />
                                             </div>
                                             <div>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>목적</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>紐⑹쟻</label>
                                                 <select 
                                                     className="form-input"
                                                     value={aiTextForm.purpose}
                                                     onChange={(e) => setAiTextForm({...aiTextForm, purpose: e.target.value})}
                                                 >
-                                                    <option value="promotion">프로모션</option>
-                                                    <option value="announcement">공지</option>
-                                                    <option value="engagement">참여유도</option>
+                                                    <option value="promotion">?꾨줈紐⑥뀡</option>
+                                                    <option value="announcement">怨듭?</option>
+                                                    <option value="engagement">李몄뿬?좊룄</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>톤앤매너</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?ㅼ븻留ㅻ꼫</label>
                                                 <select 
                                                     className="form-input"
                                                     value={aiTextForm.tone}
                                                     onChange={(e) => setAiTextForm({...aiTextForm, tone: e.target.value})}
                                                 >
-                                                    <option value="friendly">친근함</option>
-                                                    <option value="professional">전문적</option>
-                                                    <option value="exciting">흥미진진</option>
-                                                    <option value="luxurious">고급스러움</option>
+                                                    <option value="friendly">移쒓렐??/option>
+                                                    <option value="professional">?꾨Ц??/option>
+                                                    <option value="exciting">?λ?吏꾩쭊</option>
+                                                    <option value="luxurious">怨좉툒?ㅻ윭?</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>플랫폼</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?뚮옯??/label>
                                                 <select 
                                                     className="form-input"
                                                     value={aiTextForm.platform}
@@ -1517,13 +1518,13 @@
                                                 disabled={aiTextLoading || !aiTextForm.brand_name || !aiTextForm.product}
                                                 style={{ marginTop: '8px' }}
                                             >
-                                                {aiTextLoading ? <span className="loading"></span> : '✍️ 텍스트 생성'}
+                                                {aiTextLoading ? <span className="loading"></span> : '?랃툘 ?띿뒪???앹꽦'}
                                             </button>
                                         </div>
 
                                         {aiTextResults.length > 0 && (
                                             <div style={{ marginTop: '20px' }}>
-                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>생성된 카피</h4>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>?앹꽦??移댄뵾</h4>
                                                 {aiTextResults.map((result, idx) => (
                                                     <div 
                                                         key={idx} 
@@ -1531,7 +1532,7 @@
                                                         onClick={() => addAITextToCanvas(result)}
                                                     >
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                                            <span style={{ fontWeight: '600' }}>카피 {idx + 1}</span>
+                                                            <span style={{ fontWeight: '600' }}>移댄뵾 {idx + 1}</span>
                                                             <span className="score-badge">{result.score}</span>
                                                         </div>
                                                         <p style={{ fontSize: '14px', marginBottom: '8px' }}>{result.text}</p>
@@ -1550,62 +1551,62 @@
 
                                 {activeTab === 'ai-image' && (
                                     <div>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>🎨 AI 이미지 생성</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>?렓 AI ?대?吏 ?앹꽦</h3>
                                         
                                         <div className="cost-badge" style={{ marginBottom: '16px', width: '100%' }}>
-                                            <strong>💰 비용:</strong> Standard $0.04/이미지, HD $0.08/이미지
+                                            <strong>?뮥 鍮꾩슜:</strong> Standard $0.04/?대?吏, HD $0.08/?대?吏
                                         </div>
                                         
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             <div>
                                                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                                                    이미지 설명 (프롬프트) *
+                                                    ?대?吏 ?ㅻ챸 (?꾨＼?꾪듃) *
                                                 </label>
                                                 <textarea 
                                                     className="form-input"
                                                     value={aiImageForm.prompt}
                                                     onChange={(e) => setAiImageForm({...aiImageForm, prompt: e.target.value})}
-                                                    placeholder="예: A cup of strawberry frappuccino on pink background, Starbucks style, commercial photography, natural lighting"
+                                                    placeholder="?? A cup of strawberry frappuccino on pink background, Starbucks style, commercial photography, natural lighting"
                                                     rows={5}
                                                     style={{ fontSize: '13px' }}
                                                 />
                                                 <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                                                    💡 영어 프롬프트를 사용하면 더 좋은 결과를 얻을 수 있습니다
+                                                    ?뮕 ?곸뼱 ?꾨＼?꾪듃瑜??ъ슜?섎㈃ ??醫뗭? 寃곌낵瑜??살쓣 ???덉뒿?덈떎
                                                 </p>
                                             </div>
 
                                             <div>
                                                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                                                    스타일
+                                                    ?ㅽ???
                                                 </label>
                                                 <select 
                                                     className="form-input"
                                                     value={aiImageForm.style}
                                                     onChange={(e) => setAiImageForm({...aiImageForm, style: e.target.value})}
                                                 >
-                                                    <option value="vivid">Vivid (생생하고 화려한)</option>
-                                                    <option value="natural">Natural (자연스러운)</option>
+                                                    <option value="vivid">Vivid (?앹깮?섍퀬 ?붾젮??</option>
+                                                    <option value="natural">Natural (?먯뿰?ㅻ윭??</option>
                                                 </select>
                                             </div>
 
                                             <div>
                                                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                                                    크기
+                                                    ?ш린
                                                 </label>
                                                 <select 
                                                     className="form-input"
                                                     value={aiImageForm.size}
                                                     onChange={(e) => setAiImageForm({...aiImageForm, size: e.target.value})}
                                                 >
-                                                    <option value="1024x1024">정사각형 (1024×1024)</option>
-                                                    <option value="1792x1024">가로형 (1792×1024)</option>
-                                                    <option value="1024x1792">세로형 (1024×1792)</option>
+                                                    <option value="1024x1024">?뺤궗媛곹삎 (1024횞1024)</option>
+                                                    <option value="1792x1024">媛濡쒗삎 (1792횞1024)</option>
+                                                    <option value="1024x1792">?몃줈??(1024횞1792)</option>
                                                 </select>
                                             </div>
 
                                             <div>
                                                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                                                    품질
+                                                    ?덉쭏
                                                 </label>
                                                 <select 
                                                     className="form-input"
@@ -1613,7 +1614,7 @@
                                                     onChange={(e) => setAiImageForm({...aiImageForm, quality: e.target.value})}
                                                 >
                                                     <option value="standard">Standard ($0.04)</option>
-                                                    <option value="hd">HD - 고화질 ($0.08)</option>
+                                                    <option value="hd">HD - 怨좏솕吏?($0.08)</option>
                                                 </select>
                                             </div>
 
@@ -1624,16 +1625,16 @@
                                                 style={{ marginTop: '8px' }}
                                             >
                                                 {aiImageLoading ? (
-                                                    <><span className="loading"></span> 생성 중...</>
+                                                    <><span className="loading"></span> ?앹꽦 以?..</>
                                                 ) : (
-                                                    '🎨 AI 이미지 생성'
+                                                    '?렓 AI ?대?吏 ?앹꽦'
                                                 )}
                                             </button>
                                         </div>
 
                                         <div style={{ marginTop: '20px', padding: '12px', background: '#f3f4f6', borderRadius: '8px' }}>
                                             <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-                                                💡 프롬프트 예시 (클릭하여 사용)
+                                                ?뮕 ?꾨＼?꾪듃 ?덉떆 (?대┃?섏뿬 ?ъ슜)
                                             </h4>
                                             <div style={{ fontSize: '13px', color: '#6b7280' }}>
                                                 <div 
@@ -1643,7 +1644,7 @@
                                                         prompt: 'A cup of iced latte with latte art on a wooden cafe table, warm sunlight, cozy atmosphere, commercial photography, bokeh background'
                                                     })}
                                                 >
-                                                    ☕ 카페 라떼 상업 사진
+                                                    ??移댄럹 ?쇰뼹 ?곸뾽 ?ъ쭊
                                                 </div>
                                                 <div 
                                                     className="prompt-example"
@@ -1652,7 +1653,7 @@
                                                         prompt: 'Minimal product photography, white background, studio lighting, modern smartphone, clean composition, 4K quality'
                                                     })}
                                                 >
-                                                    📱 미니멀 제품 사진
+                                                    ?벑 誘몃땲硫 ?쒗뭹 ?ъ쭊
                                                 </div>
                                                 <div 
                                                     className="prompt-example"
@@ -1661,7 +1662,7 @@
                                                         prompt: 'Vibrant summer beach scene, pastel colors, Instagram aesthetic, golden hour lighting, dreamy atmosphere'
                                                     })}
                                                 >
-                                                    🏖️ 여름 해변 인스타 감성
+                                                    ?룚截??щ쫫 ?대? ?몄뒪? 媛먯꽦
                                                 </div>
                                             </div>
                                         </div>
@@ -1670,24 +1671,24 @@
                                             <div style={{ textAlign: 'center', marginTop: '20px', padding: '20px', background: '#f3f4f6', borderRadius: '8px' }}>
                                                 <div className="loading" style={{ margin: '0 auto' }}></div>
                                                 <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
-                                                    🎨 AI 이미지 생성 중...
+                                                    ?렓 AI ?대?吏 ?앹꽦 以?..
                                                 </p>
                                                 <p style={{ marginTop: '8px', color: '#9ca3af', fontSize: '12px' }}>
-                                                    DALL-E 3가 이미지를 만들고 있습니다<br/>
-                                                    약 10-20초 소요됩니다
+                                                    DALL-E 3媛 ?대?吏瑜?留뚮뱾怨??덉뒿?덈떎<br/>
+                                                    ??10-20珥??뚯슂?⑸땲??
                                                 </p>
                                             </div>
                                         )}
 
                                         {imageError && (
                                             <div className="error-box">
-                                                <strong>❌ 오류:</strong> {imageError}
+                                                <strong>???ㅻ쪟:</strong> {imageError}
                                             </div>
                                         )}
 
                                         {generatedImage && (
                                             <div style={{ marginTop: '20px' }}>
-                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>✨ 생성된 이미지</h4>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>???앹꽦???대?吏</h4>
                                                 
                                                 <div className="image-preview">
                                                     <img 
@@ -1698,18 +1699,18 @@
                                                 </div>
 
                                                 <div className="meta-info">
-                                                    <p><strong>원본 프롬프트:</strong><br/>{generatedImage.prompt}</p>
+                                                    <p><strong>?먮낯 ?꾨＼?꾪듃:</strong><br/>{generatedImage.prompt}</p>
                                                     {generatedImage.revised_prompt && (
                                                         <p>
-                                                            <strong>최적화된 프롬프트:</strong><br/>
+                                                            <strong>理쒖쟻?붾맂 ?꾨＼?꾪듃:</strong><br/>
                                                             {generatedImage.revised_prompt}
                                                         </p>
                                                     )}
                                                     <p>
-                                                        <strong>설정:</strong> {generatedImage.style} / {generatedImage.size} / {generatedImage.quality}
+                                                        <strong>?ㅼ젙:</strong> {generatedImage.style} / {generatedImage.size} / {generatedImage.quality}
                                                     </p>
                                                     <p>
-                                                        <strong>비용:</strong> ${generatedImage.meta.cost} USD
+                                                        <strong>鍮꾩슜:</strong> ${generatedImage.meta.cost} USD
                                                     </p>
                                                 </div>
 
@@ -1718,7 +1719,7 @@
                                                     onClick={addAIImageToCanvas}
                                                     style={{ width: '100%' }}
                                                 >
-                                                    ➕ 캔버스에 추가
+                                                    ??罹붾쾭?ㅼ뿉 異붽?
                                                 </button>
                                                 
                                                 <button 
@@ -1726,7 +1727,7 @@
                                                     onClick={() => setGeneratedImage(null)}
                                                     style={{ width: '100%', marginTop: '8px' }}
                                                 >
-                                                    🔄 다시 생성
+                                                    ?봽 ?ㅼ떆 ?앹꽦
                                                 </button>
                                             </div>
                                         )}
@@ -1803,12 +1804,12 @@
                             <div style={{ padding: '20px' }}>
                                 {selectedElement ? (
                                     <div>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>속성</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>?띿꽦</h3>
                                         
                                         {selectedElement.type === 'text' && (
                                             <>
                                                 <div style={{ marginBottom: '16px' }}>
-                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>텍스트</label>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?띿뒪??/label>
                                                     <textarea 
                                                         className="form-input"
                                                         value={selectedElement.text}
@@ -1818,7 +1819,7 @@
                                                 </div>
 
                                                 <div style={{ marginBottom: '16px' }}>
-                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>폰트</label>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?고듃</label>
                                                     <select 
                                                         className="form-input"
                                                         value={selectedElement.fontFamily || 'Noto Sans KR'}
@@ -1834,7 +1835,7 @@
 
                                                 <div style={{ marginBottom: '16px' }}>
                                                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
-                                                        글자 크기: {selectedElement.fontSize}px
+                                                        湲???ш린: {selectedElement.fontSize}px
                                                     </label>
                                                     <input 
                                                         type="range" 
@@ -1846,7 +1847,7 @@
                                                 </div>
 
                                                 <div style={{ marginBottom: '16px' }}>
-                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>굵기</label>
+                                                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>援듦린</label>
                                                     <select 
                                                         className="form-input"
                                                         value={selectedElement.fontWeight || 'normal'}
@@ -1863,7 +1864,7 @@
 
                                         {selectedElement.type !== 'image' && (
                                             <div style={{ marginBottom: '16px' }}>
-                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>색상</label>
+                                                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>?됱긽</label>
                                                 <input 
                                                     type="color" 
                                                     value={selectedElement.fill}
@@ -1875,7 +1876,7 @@
 
                                         <div style={{ marginBottom: '16px' }}>
                                             <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
-                                                불투명도: {Math.round(selectedElement.opacity * 100)}%
+                                                遺덊닾紐낅룄: {Math.round(selectedElement.opacity * 100)}%
                                             </label>
                                             <input 
                                                 type="range" 
@@ -1889,7 +1890,7 @@
 
                                         <div style={{ marginBottom: '16px' }}>
                                             <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>
-                                                회전: {Math.round(selectedElement.rotation)}°
+                                                ?뚯쟾: {Math.round(selectedElement.rotation)}째
                                             </label>
                                             <input 
                                                 type="range" 
@@ -1905,7 +1906,7 @@
                                             onClick={deleteElement}
                                             style={{ width: '100%', color: '#ef4444' }}
                                         >
-                                            🗑️ 삭제 <span className="keyboard-hint">Delete</span>
+                                            ?뿊截???젣 <span className="keyboard-hint">Delete</span>
                                         </button>
 
                                         {selectedElement.type === 'text' && (
@@ -1914,22 +1915,22 @@
                                                 onClick={predictPerformance}
                                                 style={{ width: '100%', marginTop: '12px' }}
                                             >
-                                                📊 성과 예측
+                                                ?뱤 ?깃낵 ?덉륫
                                             </button>
                                         )}
 
                                         {predictionData && (
                                             <div style={{ marginTop: '20px', padding: '16px', background: '#f3f4f6', borderRadius: '8px' }}>
-                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>예측 결과</h4>
+                                                <h4 style={{ marginBottom: '12px', fontWeight: '600' }}>?덉륫 寃곌낵</h4>
                                                 <div style={{ fontSize: '14px' }}>
-                                                    <p>인게이지먼트율: {predictionData.predictions.engagement_rate.value}%</p>
-                                                    <p>예상 도달: {predictionData.predictions.estimated_reach.toLocaleString()}</p>
-                                                    <p>예상 좋아요: {predictionData.predictions.estimated_likes.toLocaleString()}</p>
+                                                    <p>?멸쾶?댁?癒쇳듃?? {predictionData.predictions.engagement_rate.value}%</p>
+                                                    <p>?덉긽 ?꾨떖: {predictionData.predictions.estimated_reach.toLocaleString()}</p>
+                                                    <p>?덉긽 醫뗭븘?? {predictionData.predictions.estimated_likes.toLocaleString()}</p>
                                                     <div style={{ marginTop: '12px' }}>
-                                                        <strong>개선 제안:</strong>
+                                                        <strong>媛쒖꽑 ?쒖븞:</strong>
                                                         {predictionData.recommendations.map((rec, idx) => (
                                                             <p key={idx} style={{ marginTop: '4px', fontSize: '13px' }}>
-                                                                • {rec.suggestion} ({rec.impact})
+                                                                ??{rec.suggestion} ({rec.impact})
                                                             </p>
                                                         ))}
                                                     </div>
@@ -1939,22 +1940,22 @@
                                     </div>
                                 ) : (
                                     <div style={{ textAlign: 'center', color: '#6b7280', marginTop: '40px' }}>
-                                        <p>요소를 선택하면</p>
-                                        <p>속성을 편집할 수 있습니다</p>
+                                        <p>?붿냼瑜??좏깮?섎㈃</p>
+                                        <p>?띿꽦???몄쭛?????덉뒿?덈떎</p>
                                     </div>
                                 )}
 
                                 {trendingData && (
                                     <div style={{ marginTop: '40px' }}>
-                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>트렌딩 토픽</h3>
+                                        <h3 style={{ marginBottom: '16px', fontWeight: '600' }}>?몃젋???좏뵿</h3>
                                         <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
-                                            💡 현재 인기 키워드 (샘플 데이터)
+                                            ?뮕 ?꾩옱 ?멸린 ?ㅼ썙??(?섑뵆 ?곗씠??
                                         </p>
                                         {trendingData.trending_topics.slice(0, 4).map((topic, idx) => (
                                             <div key={idx} className="trend-card">
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                                                     <span style={{ fontWeight: '600' }}>{topic.keyword}</span>
-                                                    <span className="trend-growth">↑ {topic.growth_rate}%</span>
+                                                    <span className="trend-growth">??{topic.growth_rate}%</span>
                                                 </div>
                                                 <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
                                                     {topic.volume.toLocaleString()} mentions
@@ -1979,7 +1980,7 @@
                         color: '#6b7280'
                     }}>
                         <div>
-                            요소: {elements.length}개 | 선택: {selectedId ? '1개' : '0개'}
+                            ?붿냼: {elements.length}媛?| ?좏깮: {selectedId ? '1媛? : '0媛?}
                             <span style={{ marginLeft: '12px', color: '#9ca3af' }}>
                                 | History: {history.past.length} undo, {history.future.length} redo
                             </span>
@@ -1988,7 +1989,7 @@
                             <button onClick={() => setZoom(Math.max(25, zoom - 25))}>-</button>
                             <span>{zoom}%</span>
                             <button onClick={() => setZoom(Math.min(200, zoom + 25))}>+</button>
-                            <span>| {canvasSize.width} × {canvasSize.height}px</span>
+                            <span>| {canvasSize.width} 횞 {canvasSize.height}px</span>
                         </div>
                     </div>
                 </div>
