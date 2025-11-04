@@ -28,6 +28,7 @@
             justify-content: center;
             padding: 40px;
             background: #e9ecef;
+            overflow: auto;
         }
 
         canvas {
@@ -35,7 +36,7 @@
             background: white;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             max-width: 100%;
-            max-height: 100%;
+            height: auto;
         }
 
         .controls {
@@ -105,6 +106,15 @@
             padding: 15px;
             border-radius: 5px;
             color: #c33;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            padding: 15px;
+            border-radius: 5px;
+            color: #3c3;
             margin-bottom: 20px;
         }
 
@@ -204,6 +214,7 @@
                 </div>
 
                 <div id="errorMessage" class="error" style="display: none;"></div>
+                <div id="successMessage" class="success" style="display: none;"></div>
             </div>
 
             <button onclick="saveProject()" class="btn-save">프로젝트 저장</button>
@@ -218,12 +229,12 @@
     <script>
         let currentProjectId = null;
         let currentImageData = null;
+        let currentPrompt = '';
 
         // 페이지 로드 시
         window.onload = function() {
             if (!checkAuth()) return;
             
-            // URL에서 프로젝트 ID 가져오기
             const urlParams = new URLSearchParams(window.location.search);
             currentProjectId = urlParams.get('id');
             
@@ -236,7 +247,6 @@
             initCanvas();
         };
 
-        // 인증 확인
         function checkAuth() {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -247,7 +257,6 @@
             return true;
         }
 
-        // 로그아웃
         function handleLogout() {
             if (confirm('로그아웃 하시겠습니까?')) {
                 localStorage.removeItem('token');
@@ -256,16 +265,13 @@
             }
         }
 
-        // 캔버스 초기화
         function initCanvas() {
             const canvas = document.getElementById('mainCanvas');
             const ctx = canvas.getContext('2d');
             
-            // 배경 그리기
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 안내 텍스트
             ctx.fillStyle = '#999';
             ctx.font = '20px sans-serif';
             ctx.textAlign = 'center';
@@ -273,7 +279,6 @@
             ctx.fillText('이미지를 업로드하세요', canvas.width/2, canvas.height/2 + 20);
         }
 
-        // 프로젝트 로드
         async function loadProject(projectId) {
             try {
                 const token = localStorage.getItem('token');
@@ -289,12 +294,11 @@
                     document.getElementById('projectDate').textContent = 
                         '생성일: ' + new Date(project.createdAt).toLocaleDateString('ko-KR');
                     
-                    // 프로젝트 데이터 로드 (이미지 등)
                     if (project.data) {
                         try {
                             const data = JSON.parse(project.data);
-                            if (data.imageUrl) {
-                                loadImageToCanvas(data.imageUrl);
+                            if (data.prompt) {
+                                document.getElementById('promptInput').value = data.prompt;
                             }
                         } catch (e) {
                             console.log('No saved data');
@@ -310,7 +314,6 @@
             }
         }
 
-        // AI 이미지 생성
         async function generateImage() {
             const prompt = document.getElementById('promptInput').value.trim();
             
@@ -322,12 +325,13 @@
             const generateBtn = document.getElementById('generateBtn');
             const loadingMessage = document.getElementById('loadingMessage');
             const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
             
-            // UI 업데이트
             generateBtn.disabled = true;
             generateBtn.textContent = '생성 중...';
             loadingMessage.style.display = 'block';
             errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
 
             try {
                 const size = document.getElementById('sizeSelect').value;
@@ -344,10 +348,16 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // 생성된 이미지를 캔버스에 표시
                     loadImageToCanvas(data.imageData);
                     currentImageData = data.imageData;
-                    alert('이미지가 생성되었습니다!');
+                    currentPrompt = prompt;
+                    
+                    successMessage.textContent = '이미지가 생성되었습니다!';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
                 } else {
                     throw new Error(data.detail || '이미지 생성 실패');
                 }
@@ -362,36 +372,37 @@
             }
         }
 
-        // 이미지를 캔버스에 로드
         function loadImageToCanvas(imageData) {
             const canvas = document.getElementById('mainCanvas');
             const ctx = canvas.getContext('2d');
             const img = new Image();
             
             img.onload = function() {
-                // 캔버스 크기 조정
-                const maxWidth = 800;
-                const maxHeight = 600;
+                // 원본 비율 유지하면서 적절한 크기로 조절
+                const maxWidth = 1024;
+                const maxHeight = 768;
                 let width = img.width;
                 let height = img.height;
 
-                if (width > maxWidth || height > maxHeight) {
-                    const ratio = Math.min(maxWidth / width, maxHeight / height);
-                    width = width * ratio;
-                    height = height * ratio;
-                }
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.floor(width * ratio);
+                height = Math.floor(height * ratio);
 
                 canvas.width = width;
                 canvas.height = height;
                 
-                // 이미지 그리기
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, width, height);
                 ctx.drawImage(img, 0, 0, width, height);
+            };
+            
+            img.onerror = function() {
+                alert('이미지 로드에 실패했습니다.');
             };
             
             img.src = imageData;
         }
 
-        // 프로젝트 저장
         async function saveProject() {
             if (!currentProjectId) {
                 alert('프로젝트 ID가 없습니다.');
@@ -400,8 +411,11 @@
 
             try {
                 const token = localStorage.getItem('token');
+                
+                // 가벼운 데이터만 저장 (Base64 이미지 제외)
                 const projectData = {
-                    imageUrl: currentImageData || null,
+                    hasImage: currentImageData ? true : false,
+                    prompt: document.getElementById('promptInput').value,
                     lastModified: new Date().toISOString()
                 };
 
@@ -417,7 +431,13 @@
                 });
 
                 if (response.ok) {
-                    alert('프로젝트가 저장되었습니다!');
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.textContent = '프로젝트가 저장되었습니다!';
+                    successMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
                 } else {
                     alert('프로젝트 저장에 실패했습니다.');
                 }
