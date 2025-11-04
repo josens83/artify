@@ -1,4 +1,4 @@
-﻿* {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -16,6 +16,7 @@ body {
     padding: 20px;
 }
 
+/* Header */
 header {
     background: rgba(255, 255, 255, 0.95);
     padding: 20px 0;
@@ -39,6 +40,7 @@ nav {
     gap: 20px;
 }
 
+/* Buttons */
 button {
     padding: 10px 20px;
     border: none;
@@ -70,6 +72,7 @@ button {
     background: #c0392b;
 }
 
+/* Hero Section */
 .hero {
     text-align: center;
     padding: 60px 20px;
@@ -81,6 +84,7 @@ button {
     margin-bottom: 20px;
 }
 
+/* Projects Section */
 .projects {
     background: white;
     padding: 40px 20px;
@@ -126,4 +130,91 @@ button {
 
 .project-card button:hover {
     background: #5568d3;
+}
+
+/* Login Page */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.login-box h1 {
+    color: #667eea;
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.login-box h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: bold;
+}
+
+.login-box button:hover {
+    background: #5568d3;
+}
+
+.switch-form {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.switch-form a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.switch-form a:hover {
+    text-decoration: underline;
 }
