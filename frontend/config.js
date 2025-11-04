@@ -1,6 +1,6 @@
 // API Configuration
 const API_CONFIG = {
-  NODE_BACKEND: 'https://artify-backend-3y4c.onrender.com/api',  // ← 수정!
+  NODE_BACKEND: 'https://artify-backend-3y4r.onrender.com/api',
   PYTHON_BACKEND: 'https://artify-python-backend.onrender.com/api'
 };
 
